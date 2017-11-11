@@ -1,36 +1,41 @@
+import celery
 import psycopg2
 import itertools
 import os
-import sys
+from _celery import celery_app
 
-try:
-    params = {
-        'dbname': 'json-vault',
-        'host': 'localhost',
-        'user': os.environ['PSQL_USER'],
-        'password': os.environ['PSQL_PW']
-    }
+db_params = {
+    'dbname': 'jsonvault',
+    'host': 'localhost',
+    'user': os.environ['PSQL_USER'],
+    'password': os.environ['PSQL_PW']
+}
 
-    conn = psycopg2.connect(**params)
-except:
-    print("Could not connect to PostgreSQL")
-    sys.exit()
+class DatabaseTask(celery.Task):
+    _db = None
 
+    @property
+    def db(self):
+        if self._db is None:
+            self._db = psycopg2.connect(**db_params)
+        return self._db
+
+@celery_app.task(base = DatabaseTask, ignore_result = True)
 def store(json):
-    print('Storing: %s' % json)
-    cur = conn.cursor()
+    cur = store.db.cursor()
     cur.execute('INSERT INTO json(data) VALUES (%s)', (json,))
     cur.close()
-    conn.commit()
+    store.db.commit()
 
+@celery_app.task(base = DatabaseTask)
 def fetch():
-    print('Fetching')
-    cur = conn.cursor()
+    cur = fetch.db.cursor()
     cur.execute('SELECT * FROM json')
     raw_data = cur.fetchall()
     cur.close()
     return list(itertools.chain(*raw_data)) #Collapse list of tuples to plain list
 
+@celery_app.task(ignore_result = True)
 def broadcast(json):
     print('Broadcasting: %s' % json)
     #TODO: Broadcast over WebSockets
