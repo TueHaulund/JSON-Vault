@@ -14,7 +14,7 @@ def is_valid_json(json_string):
     return True
 
 @flask_app.route('/')
-def index():
+def get_index():
     return flask_app.send_static_file('index.html')
 
 @flask_app.route('/api/v1.0/json', methods=['GET'])
@@ -34,13 +34,15 @@ def post_json():
     if flask.request.content_length > MAX_PAYLOAD_SIZE:
         flask.abort(413)
 
-    json_string = flask.request.get_data().decode("utf-8")
+    json_string = flask.request.get_data().decode('utf-8')
 
     if not is_valid_json(json_string):
         flask.abort(400)
 
-    tasks.broadcast.delay(json_string)
     tasks.store.delay(json_string)
+
+    #TODO: Broadcast to WebSockets here
+
     return flask.make_response(json_string, 201)
 
 if __name__ == '__main__':

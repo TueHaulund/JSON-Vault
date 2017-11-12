@@ -34,8 +34,3 @@ def fetch():
     raw_data = cur.fetchall()
     cur.close()
     return list(itertools.chain(*raw_data)) #Collapse list of tuples to plain list
-
-@celery_app.task(ignore_result = True)
-def broadcast(json):
-    print('Broadcasting: %s' % json)
-    #TODO: Broadcast over WebSockets
