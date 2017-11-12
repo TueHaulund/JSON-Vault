@@ -1,4 +1,5 @@
 import flask
+import flask_socketio as socketio
 import json
 
 import jsonvault_tasks as tasks
@@ -6,6 +7,7 @@ import jsonvault_tasks as tasks
 MAX_PAYLOAD_SIZE = 1024 * 1024 #One MiB
 
 flask_app = flask.Flask(__name__)
+socketio_app = socketio.SocketIO(flask_app)
 
 def is_valid_json(json_string):
     try:
@@ -42,9 +44,9 @@ def post_json():
 
     tasks.store.delay(json_string)
 
-    #TODO: Broadcast to WebSockets here
+    socketio_app.emit('json', json_string) #Broadcast to websockets here
 
     return flask.make_response(json_string, 201)
 
 if __name__ == '__main__':
-    flask_app.run(debug=True)
+    socketio_app.run(flask_app)

@@ -1,11 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JSON-Vault Client</title>
+    <title>JSONVault Client</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style type="text/css">
+        #output {
+            border-style: solid;
+            overflow-y: scroll;
+            height: 400px;
+            width: 800px;
+        }
+    </style>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var socket = null;
+    
+        function connect() {
+            if (socket !== null)
+                return;
+
+            socket = io.connect('http://' + document.domain + ':' + location.port, {"forceNew": true});
+        
+            socket.on('connect', function() {
+                log("Connected to server!");
+            });
+
+            socket.on('json', function(msg) {
+                log("Received JSON from server: " + msg);
+            });
+
+            socket.on('disconnect', function() {
+                log("Disconnected from server!");
+            });
+        }
+
+        function disconnect() {
+            socket.disconnect();
+            socket = null;
+        }
+
+        function log(str) {
+            document.getElementById("output").innerHTML += str + "<br />";
+        }
+    </script>
 </head>
 <body>
-    <h2>JSON-Vault Client</h2>
+    <h2>JSONVault Client</h2>
+    <button onclick="connect()">Connect to server</button>&nbsp;&nbsp;<button onclick="disconnect()">Disconnect from server</button><br /><br />
+    <div id="output"></div>
 </body>
 </html>

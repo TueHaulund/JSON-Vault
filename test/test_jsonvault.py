@@ -28,30 +28,38 @@ class TestJSONVault(TestCase):
         self.assertEqual(resp.get_data().decode('utf-8'), '[{"example": "json"},{"more": "json"}]')
 
     @mock.patch('jsonvault.tasks.store')
-    def test_post_json_invoked(self, mock_store):
-        #Test that store task is invoked
+    @mock.patch('jsonvault.socketio_app')
+    def test_post_json_invoked(self, mock_socketio, mock_store):
+        #Test that store task and socket.emit is invoked
         resp = self.flask_app.post('/api/v1.0/json', data = '{"example": "json"}', content_type = "application/json")
         self.assertTrue(mock_store.delay.called)
+        self.assertTrue(mock_socketio.emit.called)
 
     @mock.patch('jsonvault.tasks.store')
-    def test_post_json_return(self, mock_store):
+    @mock.patch('jsonvault.socketio_app')
+    def test_post_json_return(self, mock_socketio, mock_store):
         #Test valid POST request
         resp = self.flask_app.post('/api/v1.0/json', data = '{"example": "json"}', content_type = "application/json")
         self.assertEqual(resp.status, "201 CREATED")
         self.assertEqual(resp.get_data().decode('utf-8'), '{"example": "json"}')
+        mock_socketio.emit.assert_called_with('json', '{"example": "json"}')
+        mock_socketio.emit.reset_mock()
 
         #Test missing Content-Type header
         resp = self.flask_app.post('/api/v1.0/json', data = '{"example": "json"}')
         self.assertEqual(resp.status, "400 BAD REQUEST")
+        mock_socketio.emit.assert_not_called()
 
         #Test invalid JSON POST
         resp = self.flask_app.post('/api/v1.0/json', data = '{"example": "json"]', content_type = "application/json")
         self.assertEqual(resp.status, "400 BAD REQUEST")
+        mock_socketio.emit.assert_not_called()
 
         #Request too large
         large_json = '{"example": "' + (jsonvault.MAX_PAYLOAD_SIZE * 'json') + '"}'
         resp = self.flask_app.post('/api/v1.0/json', data = large_json, content_type = "application/json")
         self.assertEqual(resp.status, "413 REQUEST ENTITY TOO LARGE")
+        mock_socketio.emit.assert_not_called()
 
     #Something in Flask is causing Python to emit a ResourceWarning when running this test
     #It appears to be harmless and it only happens when testing
