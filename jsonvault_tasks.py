@@ -2,23 +2,28 @@ import celery
 import psycopg2
 import itertools
 import os
+import sys
+
 from _celery import celery_app
 
-db_params = {
-    'dbname': 'jsonvault',
-    'host': 'localhost',
-    'user': os.environ['PSQL_USER'],
-    'password': os.environ['PSQL_PW']
-}
-
 class DatabaseTask(celery.Task):
-    _db = None
+    conn = None
 
     @property
     def db(self):
-        if self._db is None:
-            self._db = psycopg2.connect(**db_params)
-        return self._db
+        if self.conn is None:
+            try:
+                db_params = {
+                    'dbname': 'jsonvault',
+                    'host': 'localhost',
+                    'user': os.environ['PSQL_USER'],
+                    'password': os.environ['PSQL_PW']
+                }
+            except:
+                raise RuntimeError("No database credentials provided")
+            
+            self.conn = psycopg2.connect(**db_params)
+        return self.conn
 
 @celery_app.task(base = DatabaseTask, ignore_result = True)
 def store(json):

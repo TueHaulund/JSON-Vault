@@ -3,7 +3,7 @@ import celery
 celery_params = {
     'broker': 'redis://localhost:6379/0',
     'backend': 'redis://localhost:6379/0',
-    'include': ['tasks']
+    'include': ['jsonvault_tasks']
 }
 
 celery_app = celery.Celery('jsonvault', **celery_params)

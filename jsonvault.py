@@ -1,6 +1,7 @@
 import flask
 import json
-import tasks
+
+import jsonvault_tasks as tasks
 
 MAX_PAYLOAD_SIZE = 1024 * 1024 #One MiB
 
