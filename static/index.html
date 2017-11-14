@@ -36,6 +36,9 @@
         }
 
         function disconnect() {
+            if (socket === null)
+                return;
+
             socket.disconnect();
             socket = null;
         }

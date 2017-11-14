@@ -1,0 +1,1 @@
+CREATE TABLE json(data text);

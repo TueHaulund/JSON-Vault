@@ -15,7 +15,7 @@ class DatabaseTask(celery.Task):
             try:
                 db_params = {
                     'dbname': 'jsonvault',
-                    'host': 'localhost',
+                    'host': 'postgres',
                     'user': os.environ['PSQL_USER'],
                     'password': os.environ['PSQL_PW']
                 }

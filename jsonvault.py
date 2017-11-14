@@ -49,4 +49,4 @@ def post_json():
     return flask.make_response(json_string, 201)
 
 if __name__ == '__main__':
-    socketio_app.run(flask_app)
+    socketio_app.run(flask_app, host='0.0.0.0')

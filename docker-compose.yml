@@ -1,0 +1,32 @@
+version: '2'
+
+services:
+  web:
+    build: .
+    ports:
+      - '5000:5000'
+    command: 'python jsonvault.py'
+
+  celery:
+    build: .
+    command: 'celery worker -A _celery'
+    user: 'nobody'
+    environment:
+      - 'PSQL_USER=dbuser'
+      - 'PSQL_PW=dbpass'
+
+  redis:
+    image: 'redis'
+    hostname: 'redis'
+
+  postgres:
+    image: 'postgres'
+    hostname: 'postgres'
+    restart: 'always'
+    environment:
+      - 'POSTGRES_USER=dbuser'
+      - 'POSTGRES_PASSWORD=dbpass'
+      - 'POSTGRES_DB=jsonvault'
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql

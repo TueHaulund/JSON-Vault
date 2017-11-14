@@ -16,7 +16,7 @@ class TestStore(TestCase):
     def test_store_invoked_connect(self, mock_connect):
         #Test that connect() is called with the right arguments when DB credentials are in place
         jsonvault_tasks.store('dummy')
-        mock_connect.assert_called_with(dbname='jsonvault', host='localhost', password='dummypw', user='dummyuser')
+        mock_connect.assert_called_with(dbname='jsonvault', host='postgres', password='dummypw', user='dummyuser')
 
     @mock.patch('jsonvault_tasks.psycopg2.connect')
     @mock.patch('jsonvault_tasks.store.conn', new = None)
@@ -52,7 +52,7 @@ class TestFetch(TestCase):
     def test_fetch_invoked_connect(self, mock_connect):
         #Test that connect() is called with the right arguments when DB credentials are in place
         jsonvault_tasks.fetch()
-        mock_connect.assert_called_with(dbname='jsonvault', host='localhost', password='dummypw', user='dummyuser')
+        mock_connect.assert_called_with(dbname='jsonvault', host='postgres', password='dummypw', user='dummyuser')
 
     @mock.patch('jsonvault_tasks.psycopg2.connect')
     @mock.patch('jsonvault_tasks.fetch.conn', new = None)

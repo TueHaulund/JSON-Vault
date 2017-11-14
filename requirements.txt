@@ -1,0 +1,6 @@
+Flask
+flask_socketio
+eventlet
+redis
+celery
+psycopg2
